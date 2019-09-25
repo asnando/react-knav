@@ -1,26 +1,42 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
 
-function App() {
+const Grid = ({ rows = 0, cols = 0 }) => {
+  rows = Array.from(Array(rows).keys());
+  cols = Array.from(Array(cols).keys());
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="grid">
+      {rows.map(row => (
+        <div className="row">
+          {cols.map(col => (
+            <div className="col">
+              <p>{row}x{col}</p>
+            </div>
+          ))}
+        </div>
+      ))}
     </div>
   );
-}
+};
 
-export default App;
+const Container = () => (
+  <div className="app">
+    <div className="container">
+      <Grid rows={2} cols={3} />
+      <br />
+      <Grid rows={5} cols={5} />
+    </div>
+    <div className="buttons">
+      <button type="button">Up</button>
+      <button type="button">Down</button>
+      <button type="button">Right</button>
+      <button type="button">Left</button>
+      <br />
+      <button type="button">Back</button>
+      <button type="button">Esc</button>
+      <button type="button">Enter</button>
+    </div>
+  </div>
+);
+
+export default Container;
