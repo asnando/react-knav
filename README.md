@@ -156,7 +156,7 @@ Manually dispatched the [action](#action-types) tot the navigator. Use it when m
 <b>NOTE:</b> The `position` param refers to an array with the `x` and `y` coordinate while the `reference` refers the component reference (`this`).
 
 ## Examples
-You can explore more about this lib running our examples in the [examples](https://github.com/ffrm/react-knav/tree/develop/examples) folder.
+You can explore more about this lib running our examples in the [examples](https://github.com/ffrm/react-knav/tree/master/examples) folder.
 
 ## Todo
 - Handle the moment where the parent component gets inactive (based on the child leave events). So then the parent component can make any additional transition effect.
