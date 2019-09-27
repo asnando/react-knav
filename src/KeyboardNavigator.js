@@ -42,7 +42,8 @@ class KeyboardNavigator {
   }
 
   updatePosition(position) {
-    const { x, y } = position;
+    const x = position[0];
+    const y = position[1];
     this.makeMove(x, y);
   }
 
