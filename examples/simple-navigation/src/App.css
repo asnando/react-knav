@@ -3,21 +3,22 @@
 }
 
 .app {
+  margin-top: 1em;
   display: flex;
   flex-direction: row;
   justify-content: space-around;
 }
 
 .container {
-  width: 40em;
-  height: 20em;
+  width: 35em;
   background-color: #ddd;
   border-radius: 4px;
 }
 
 .buttons {
   border: 2px solid #ddd;
-  height: 3em;
+  padding: 1em 0 1em 0;
+  text-align: center;
 }
 
 .grid {
@@ -46,4 +47,8 @@ p {
 
 .active {
   background-color: red;
+}
+
+.selected {
+  background-color: green;
 }
