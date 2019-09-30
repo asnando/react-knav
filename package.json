@@ -7,6 +7,14 @@
     "lint": "eslint src"
   },
   "author": "Fernando Rama",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ffrm/react-knav.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ffrm/react-knav/issues"
+  },
+  "homepage": "https://github.com/ffrm/react-knav#readme",
   "license": "ISC",
   "devDependencies": {
     "eslint": "^6.4.0",
