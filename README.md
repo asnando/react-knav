@@ -112,8 +112,30 @@ Using the `watchKeyboard` function it will automatically bind the `keydown` even
 ### Action Types
 If you prefer to manually dispatch the action to the navigator, there is a list with the current supported actions. The action is a simple string with one of the following values: `up`, `right`, `down`, `left`, `enter`, `esc`, `back`.
 
-<!-- ## Navigator options
-The `KeyboardNavigator` class, created by the `createNavigator` helper function or directly by a class instance can receive a object with the following properties: -->
+## Stacks
+In some cases (commonly when using routes) there is a need to cache each view coordinates state. In that cases we can create and use `stacks`.
+
+For example, when you enter in a component which represents a full screen (a.k.a route) you need
+to tell the navigator to create a new stack.
+
+```javascript
+class MyRouteComponent extends PureComponent {
+  componentDidMount() {
+    navigator.setActiveStack(0);
+  }
+}
+```
+
+The stack will cache all the coordinates (if `cached` option is enabled) and when you get back to the `0` stack (like in the example) you can restore the previous stack state just calling the `restoreStackPosition()` method.
+
+```javascript
+componentDidMount() {
+  // ... Previous piece of code
+  navigator.restoreStackPosition();
+}
+```
+
+Restoring the stack to the previous position will automatically hightlights and (re)calls the hooks from the components.
 
 ## Lifecycle
 The following hook functions are called by the navigator after it receives a action:

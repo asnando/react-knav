@@ -16,23 +16,32 @@ class KeyboardNavigator {
     reset = true,
   } = {}) {
     Object.assign(this, {
-      x: 0,
-      y: 0,
       refs: [],
-      cached: {},
+      stacks: [],
+      activeStack: 0,
       cacheEnabled: !!cache,
-      resetAxis: !!reset,
+      resetAxisEnabled: !!reset,
     });
+    this.setActiveStack(0);
   }
 
-  createComponentReference(position, ref) {
-    this.refs.push({ position, ref });
+  isCacheEnabled() {
+    const { cacheEnabled } = this;
+    return !!cacheEnabled;
+  }
+
+  shouldResetAxis() {
+    const { resetAxisEnabled } = this;
+    return !!resetAxisEnabled;
   }
 
   registerComponent(position, ref) {
     const x = position[0];
     const y = position[1];
-    this.createComponentReference({ x, y }, ref);
+    this.refs.push({
+      position: { x, y },
+      ref,
+    });
   }
 
   unregisterComponent(ref) {
@@ -41,28 +50,64 @@ class KeyboardNavigator {
     ));
   }
 
-  updatePosition(position) {
-    const x = position[0];
-    const y = position[1];
-    this.makeMove(x, y);
+  _createStack(stackIndex = 0) {
+    this.stacks[stackIndex] = {
+      cachedY: {},
+      x: 0,
+      y: 0,
+    };
+  }
+
+  getActiveStack() {
+    const { stacks, activeStack } = this;
+    return stacks[activeStack];
+  }
+
+  setActiveStack(stackIndex = 0) {
+    const { stacks } = this;
+    if (!stacks[stackIndex]) {
+      this._createStack(stackIndex);
+    }
+    this.activeStack = stackIndex;
+  }
+
+  updatePosition([x, y]) {
+    this.makeMove(x, y, true);
+  }
+
+  restoreStackPosition() {
+    const { x, y } = this.getCurrentPosition();
+    this.makeMove(x, y, true);
   }
 
   getX() {
-    return this.x;
+    const { x } = this.getActiveStack();
+    return x;
   }
 
   getY() {
-    return this.y;
+    const { y } = this.getActiveStack();
+    return y;
   }
 
   setX(value) {
-    this.x = value;
+    const activeStack = this.getActiveStack();
+    activeStack.x = value;
   }
 
   setY(value) {
-    this.y = value;
+    const activeStack = this.getActiveStack();
+    activeStack.y = value;
   }
 
+  getCurrentPosition() {
+    return {
+      x: this.getX(),
+      y: this.getY(),
+    };
+  }
+
+  // Returns the higher X axis coordinate.
   getXAxisSize() {
     const { refs } = this;
     return Math.max(
@@ -72,6 +117,7 @@ class KeyboardNavigator {
     );
   }
 
+  // Returns the higher Y axis coordinate.
   getYAxisSize() {
     const { refs } = this;
     return Math.max(
@@ -79,12 +125,6 @@ class KeyboardNavigator {
         .map(({ position }) => position)
         .map(({ y }) => y),
     );
-  }
-
-  getCurrentPosition() {
-    const x = this.getX();
-    const y = this.getY();
-    return { x, y };
   }
 
   getRefAtPosition(position) {
@@ -98,12 +138,7 @@ class KeyboardNavigator {
   }
 
   refExistsAtPosition(position) {
-    const { refs } = this;
-    return !!refs.find(({ position: refPosition }) => {
-      const { x: ax, y: ay } = position;
-      const { x: bx, y: by } = refPosition;
-      return ax === bx && ay === by;
-    });
+    return !!this.getRefAtPosition(position);
   }
 
   callComponentHook(position = this.getCurrentPosition(), hookName) {
@@ -130,43 +165,47 @@ class KeyboardNavigator {
     return this.callComponentHook(position, 'componentDidLeave');
   }
 
-  isCacheEnabled() {
-    const { cacheEnabled } = this;
-    return !!cacheEnabled;
+  clearActiveStackCache() {
+    const activeStack = this.getActiveStack();
+    activeStack.cachedY = {};
   }
 
-  shouldResetAxis() {
-    const { resetAxis } = this;
-    return !!resetAxis;
+  cacheAxisValue(y, x) {
+    const { cachedY } = this.getActiveStack();
+    cachedY[y] = x;
   }
 
-  cacheValue(y, x) {
-    this.cached[y] = x;
-  }
-
-  getCachedAxis(y) {
-    return this.cached[y];
+  getCachedAxisValue(y) {
+    const { cachedY } = this.getActiveStack();
+    return cachedY[y];
   }
 
   clearCache() {
-    this.cached = {};
-    const { y } = this.getCurrentPosition();
-    // Force a move
-    this.makeMove(0, y);
+    this.clearActiveStackCache();
+    this.restoreStackPosition();
   }
 
-  makeMove(x, y) {
-    const { y: selfY } = this.getCurrentPosition();
-    if (y !== selfY) {
-      if (this.isCacheEnabled()) {
-        this.cacheValue(selfY, x);
+  makeMove(x, y, restoring = false) {
+    const { y: currentY } = this.getCurrentPosition();
+    if (y !== currentY) {
+      const isCacheEnabled = this.isCacheEnabled();
+      // When cache feature is enabled it will save the
+      // x axis position of the current stack before making the move.
+      // Later on if user get back tot the same Y axis coordinate it
+      // will restore this current value.
+      if (!restoring && isCacheEnabled) {
+        this.cacheAxisValue(currentY, x);
       }
+      // If 'resetAxis' feature is enabled it will always reset the X
+      // axis back to 0 when the Y axis change.
       // eslint-disable-next-line no-param-reassign
       if (this.shouldResetAxis()) x = 0;
-      if (this.isCacheEnabled()) {
-        const cachedY = this.getCachedAxis(y);
+      // Restore the last cached X axis coordinate when
+      // user come back to the same Y axis coordinate.
+      if (isCacheEnabled) {
+        const cached = this.getCachedAxisValue(y);
         // eslint-disable-next-line no-param-reassign
-        if (isNumber(cachedY)) x = cachedY;
+        if (isNumber(cached)) x = cached;
       }
     }
     if (this.refExistsAtPosition({ x, y })) {
