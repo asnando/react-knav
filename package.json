@@ -15,7 +15,7 @@
     "url": "https://github.com/ffrm/react-knav/issues"
   },
   "homepage": "https://github.com/ffrm/react-knav#readme",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "eslint": "^6.4.0",
     "eslint-config-airbnb": "^18.0.1",
